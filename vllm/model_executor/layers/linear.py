@@ -30,23 +30,12 @@ from vllm.model_executor.utils import set_weight_attrs
 logger = init_logger(__name__)
 
 WEIGHT_LOADER_V2_SUPPORTED = [
-    "CompressedTensorsLinearMethod",
-    "AWQMarlinLinearMethod",
-    "AWQLinearMethod",
-    "GPTQMarlinLinearMethod",
-    "Fp8LinearMethod",
-    "MarlinLinearMethod",
-    "QQQLinearMethod",
-    "GPTQMarlin24LinearMethod",
-    "TPUInt8LinearMethod",
-    "GPTQLinearMethod",
-    "FBGEMMFp8LinearMethod",
-    "ModelOptFp8LinearMethod",
-    "IPEXAWQLinearMethod",
-    "IPEXGPTQLinearMethod",
-    "HQQMarlinMethod",
-    "QuarkLinearMethod",
-    "ModelOptNvFp4LinearMethod",
+    "CompressedTensorsLinearMethod", "AWQMarlinLinearMethod",
+    "AWQLinearMethod", "GPTQMarlinLinearMethod", "Fp8LinearMethod",
+    "MarlinLinearMethod", "QQQLinearMethod", "GPTQMarlin24LinearMethod",
+    "TPUInt8LinearMethod", "GPTQLinearMethod", "FBGEMMFp8LinearMethod",
+    "ModelOptFp8LinearMethod", "IPEXAWQLinearMethod", "IPEXGPTQLinearMethod",
+    "HQQMarlinMethod", "QuarkLinearMethod", "BlockInt8LinearMethod", "ModelOptNvFp4LinearMethod",
 ]
 
 
@@ -744,9 +733,11 @@ class MergedColumnParallelLinear(ColumnParallelLinear):
         if isinstance(param, BlockQuantScaleParameter):
             from vllm.model_executor.layers.quantization.fp8 import (
                 Fp8LinearMethod, Fp8MoEMethod)
+            from vllm.model_executor.layers.quantization.blockwise_int8 import (
+                BlockInt8LinearMethod, BlockInt8MoEMethod)
             assert self.quant_method is not None
             assert isinstance(self.quant_method,
-                              (Fp8LinearMethod, Fp8MoEMethod))
+                              (Fp8LinearMethod, Fp8MoEMethod, BlockInt8LinearMethod, BlockInt8MoEMethod))
             weight_block_size = self.quant_method.quant_config.weight_block_size
             assert weight_block_size is not None
             block_n, _ = weight_block_size[0], weight_block_size[1]
