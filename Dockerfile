@@ -144,19 +144,19 @@ RUN if [ "$RUN_WHEEL_CHECK" = "true" ]; then \
     fi
 #################### EXTENSION Build IMAGE ####################
 
-#################### DEV IMAGE ####################
-FROM base as dev
+# #################### DEV IMAGE ####################
+# FROM base as dev
 
-# This timeout (in seconds) is necessary when installing some dependencies via uv since it's likely to time out
-# Reference: https://github.com/astral-sh/uv/pull/1694
-ENV UV_HTTP_TIMEOUT=500
+# # This timeout (in seconds) is necessary when installing some dependencies via uv since it's likely to time out
+# # Reference: https://github.com/astral-sh/uv/pull/1694
+# ENV UV_HTTP_TIMEOUT=500
 
-COPY requirements/lint.txt requirements/lint.txt
-COPY requirements/test.txt requirements/test.txt
-COPY requirements/dev.txt requirements/dev.txt
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install -r requirements/dev.txt
-#################### DEV IMAGE ####################
+# COPY requirements/lint.txt requirements/lint.txt
+# COPY requirements/test.txt requirements/test.txt
+# COPY requirements/dev.txt requirements/dev.txt
+# RUN --mount=type=cache,target=/root/.cache/uv \
+#     uv pip install -r requirements/dev.txt
+# #################### DEV IMAGE ####################
 
 #################### vLLM installation IMAGE ####################
 # image with vLLM installed
@@ -236,40 +236,40 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 #################### vLLM installation IMAGE ####################
 
-#################### TEST IMAGE ####################
-# image to run unit testing suite
-# note that this uses vllm installed by `pip`
-FROM vllm-base AS test
+# #################### TEST IMAGE ####################
+# # image to run unit testing suite
+# # note that this uses vllm installed by `pip`
+# FROM vllm-base AS test
 
-ADD . /vllm-workspace/
+# ADD . /vllm-workspace/
 
-# This timeout (in seconds) is necessary when installing some dependencies via uv since it's likely to time out
-# Reference: https://github.com/astral-sh/uv/pull/1694
-ENV UV_HTTP_TIMEOUT=500
+# # This timeout (in seconds) is necessary when installing some dependencies via uv since it's likely to time out
+# # Reference: https://github.com/astral-sh/uv/pull/1694
+# ENV UV_HTTP_TIMEOUT=500
 
-# install development dependencies (for testing)
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install -r requirements/dev.txt
+# # install development dependencies (for testing)
+# RUN --mount=type=cache,target=/root/.cache/uv \
+#     uv pip install -r requirements/dev.txt
 
-# install development dependencies (for testing)
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install -e tests/vllm_test_utils
+# # install development dependencies (for testing)
+# RUN --mount=type=cache,target=/root/.cache/uv \
+#     uv pip install -e tests/vllm_test_utils
 
-# enable fast downloads from hf (for testing)
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install hf_transfer
-ENV HF_HUB_ENABLE_HF_TRANSFER 1
+# # enable fast downloads from hf (for testing)
+# RUN --mount=type=cache,target=/root/.cache/uv \
+#     uv pip install hf_transfer
+# ENV HF_HUB_ENABLE_HF_TRANSFER 1
 
-# Copy in the v1 package for testing (it isn't distributed yet)
-COPY vllm/v1 /usr/local/lib/python3.12/dist-packages/vllm/v1
+# # Copy in the v1 package for testing (it isn't distributed yet)
+# COPY vllm/v1 /usr/local/lib/python3.12/dist-packages/vllm/v1
 
-# doc requires source code
-# we hide them inside `test_docs/` , so that this source code
-# will not be imported by other tests
-RUN mkdir test_docs
-RUN mv docs test_docs/
-RUN mv vllm test_docs/
-#################### TEST IMAGE ####################
+# # doc requires source code
+# # we hide them inside `test_docs/` , so that this source code
+# # will not be imported by other tests
+# RUN mkdir test_docs
+# RUN mv docs test_docs/
+# RUN mv vllm test_docs/
+# #################### TEST IMAGE ####################
 
 #################### OPENAI API SERVER ####################
 # base openai image with additional requirements, for any subsequent openai-style images
@@ -289,12 +289,12 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 ENV VLLM_USAGE_SOURCE production-docker-image
 
-# define sagemaker first, so it is not default from `docker build`
-FROM vllm-openai-base AS vllm-sagemaker
+# # define sagemaker first, so it is not default from `docker build`
+# FROM vllm-openai-base AS vllm-sagemaker
 
-COPY examples/online_serving/sagemaker-entrypoint.sh .
-RUN chmod +x sagemaker-entrypoint.sh
-ENTRYPOINT ["./sagemaker-entrypoint.sh"]
+# COPY examples/online_serving/sagemaker-entrypoint.sh .
+# RUN chmod +x sagemaker-entrypoint.sh
+# ENTRYPOINT ["./sagemaker-entrypoint.sh"]
 
 FROM vllm-openai-base AS vllm-openai
 
